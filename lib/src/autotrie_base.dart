@@ -1,19 +1,44 @@
 import 'datatree/tree.dart';
 
+/// Engine for auto-completion of Strings.
+///
+/// Add entries to build up the suggestion bank. Then, you can use the suggest
+/// method to get the auto-completions for the beginning of a String.
 class AutoComplete {
   TrieSearchTree _tree;
 
-  AutoComplete() {
+  /// Constructs an instance of `AutoComplete`.
+  ///
+  /// If you pass a `bank` parameter, the engine will have all the Strings in
+  /// bank as search results. If you enter a word multiple times, it will be
+  /// prioritized in the search results, since search results are sorted by
+  /// number of times entered.
+  AutoComplete({List<String> bank}) {
     _tree = TrieSearchTree();
+    bank ??= <String>[];
+    for (var x in bank) {
+      enter(x);
+    }
   }
 
   /// Add an entry to the engine.
   ///
   /// The engine will now include `entry' as a search result. If you enter a word
   /// multiple times, it will be prioritized in the search results, since search
-  /// results are sorted by number of entries matching that search.
+  /// results are sorted by number of times entered.
   void enter (String entry) {
     _tree.addWord(entry);
+  }
+
+  /// Add multiple entries to the engine.
+  ///
+  /// The engine will now include the contents of `entries` as a search result.
+  /// If you enter a word multiple times, it will be prioritized in the search
+  /// results, since search results are sorted by number of times entered.
+  void enterList (List<String> entries) {
+    for (var x in entries) {
+      enter(x);
+    }
   }
 
   /// Clear all the entries. The engine is now blank.

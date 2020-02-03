@@ -1,7 +1,7 @@
-import 'package:autrotrie/autotrie.dart';
+import 'package:autotrie/autotrie.dart';
 
 void main() {
-  var engine = AutoComplete();
+  var engine = AutoComplete(); //You can also initialize with a starting databank.
 
   engine.enter('more'); // Enter more thrice.
   engine.enter('more');
@@ -25,8 +25,9 @@ void main() {
   print(engine.suggest('mo')); // Suggestions starting with 'mo', sorted by frequency.
   // Result: [more, moody, morty]
 
-  print(engine.allEntries); // Get all entries.
+  print(engine.allEntries); // Get all entries, sorted by frequency.
   // Result: [more, moody, morty, sorose, sorty]
 }
 
-// Check the API Reference for the latest information on each class.
+// Check the API Reference for the latest information and adv.
+// methods from this class.

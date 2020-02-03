@@ -14,10 +14,10 @@ Read more about Trie [here][trie].
 A usage example is provided below. Check the API Reference for detailed docs:
 
 ```dart
-import 'package:autrotrie/autotrie.dart';
+import 'package:autotrie/autotrie.dart';
 
 void main() {
-  var engine = AutoComplete();
+  var engine = AutoComplete(); //You can also initialize with a starting databank.
 
   engine.enter('more'); // Enter more thrice.
   engine.enter('more');
@@ -45,14 +45,15 @@ void main() {
   // Result: [more, moody, morty, sorose, sorty]
 }
 
-// Check the API Reference for the latest information on this class.
+// Check the API Reference for the latest information and adv. 
+// methods from this class.
 ```
 
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
-[tracker]: http://example.com/issues/replaceme
+[tracker]: https://github.com/AKushWarrior/autotrie/issues
 
 ---
 ###### This library and its contents are subject to the terms of the Mozilla Public License, v. 2.0.

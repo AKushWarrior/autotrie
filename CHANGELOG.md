@@ -1,3 +1,8 @@
-## 1.0.0
+## 0.1.2
+- Added methods for adding List<String>
+- Better documentation
 
-- Initial version, created by Stagehand
+## 0.1.1 - 0.1.1+1
+- Initial commit and publish
+- Provides Trie engine for autocompletion
+- Has all the basic methods
