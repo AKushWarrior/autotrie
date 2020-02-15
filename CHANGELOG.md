@@ -1,3 +1,7 @@
+## 0.2.1
+- Added integration with Hive
+- Better documentation
+
 ## 0.1.2
 - Added methods for adding List<String>
 - Better documentation

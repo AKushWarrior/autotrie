@@ -49,6 +49,15 @@ void main() {
 // methods from this class.
 ```
 
+## Hive Integration
+- [Hive][hive] is a speedy, local, and key-value database for Dart/Flutter. Go check it out if you haven't already!
+- Hive integration is now available with autotrie:
+    - Uses the AutoCompleteBox class, which extends Hive's Box class.
+    - Call `refreshAuto` after making changes to build the autocomplete engine
+    - You can then use `searchKeys(String prefix)` and `searchValues(String prefix)` to get auto-suggestions.
+
+[hive]: https://pub.dev/packages/hive
+
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].

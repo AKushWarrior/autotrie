@@ -1,8 +1,6 @@
-/// Support for doing something awesome.
+/// AutoTrie exports a class for autocompletion based on a List of Strings.
 ///
-/// More dartdocs go here.
-library ternary;
+/// It also exports a class for integrating this autocompletion with Hive.
+library autotrie;
 
 export 'src/autotrie_base.dart';
-
-// TODO: Export any libraries intended for clients of this package.
