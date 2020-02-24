@@ -1,7 +1,11 @@
+import 'package:collection/collection.dart' as collect;
+
 class TrieSearchTree {
   TrieNode root;
+
   TrieSearchTree () {
     root = TrieNode('', false);
+    root.children = <TrieNode>[];
   }
 
   void addWord (String word) {
@@ -13,8 +17,8 @@ class TrieSearchTree {
       } else {
         x = base.children[base.children.indexOf(x)];
       }
+      x.lastInsert = DateTime.now().microsecondsSinceEpoch;
       if (i == word.length-1) {
-        x.isEnd = true;
         x.hits++;
       }
       base = x;
@@ -31,10 +35,19 @@ class TrieSearchTree {
         return [];
       }
     }
-    if (base.children == <TrieNode>[] && base.isEnd) return [prefix];
+    if (base.children == <TrieNode>[] && base.hits > 0) return [prefix];
     var returner = <TrieString>[];
     _suggestRec(base, prefix, returner);
     returner.sort((TrieString a, TrieString b) {
+      if (a.lastInsert < b.lastInsert) {
+        return 1;
+      } else if (a.lastInsert == b.lastInsert) {
+        return 0;
+      } else {
+        return -1;
+      }
+    });
+    returner.mergeSort((TrieString a, TrieString b) {
       if (a.hits < b.hits) {
         return 1;
       } else if (a.hits == b.hits) {
@@ -47,7 +60,7 @@ class TrieSearchTree {
   }
 
   void _suggestRec (TrieNode node, String word, List<TrieString> returner) {
-    if (node.isEnd) returner.add(TrieString(word, node.hits));
+    if (node.hits > 0) returner.add(TrieString(word, node.hits, node.lastInsert));
     for (var n in node.children) {
       _suggestRec(n, word + n.value, returner);
     }
@@ -72,10 +85,9 @@ class TrieSearchTree {
 
   bool _delete (TrieNode cur, String word, int index) {
     if (index == word.length) {
-      if (!cur.isEnd) {
+      if (!(cur.hits > 0)) {
         return false;
       }
-      cur.isEnd = false;
       return cur.children.isEmpty;
     }
     var ch = word[index];
@@ -83,7 +95,7 @@ class TrieSearchTree {
     if (node == null) {
       return false;
     }
-    var shouldDeleteCurrentNode = _delete(node, word, index + 1) && !node.isEnd;
+    var shouldDeleteCurrentNode = _delete(node, word, index + 1) && !(node.hits>0);
 
     if (shouldDeleteCurrentNode) {
       cur.children.remove(TrieNode(ch, false));
@@ -96,27 +108,34 @@ class TrieSearchTree {
 class TrieString {
   String value;
   int hits;
+  int lastInsert;
 
-  TrieString(String value, int hits) {
+  TrieString(String value, int hits, int insert) {
     this.value = value;
     this.hits = hits;
+    lastInsert = insert;
   }
 }
 
 class TrieNode {
   String value;
   List<TrieNode> children;
-  bool isEnd;
+  int lastInsert;
   int hits = 0;
 
   TrieNode(String value, bool isEnd) {
     this.value = value;
-    this.isEnd = isEnd;
     children = <TrieNode>[];
   }
 
   @override
   bool operator ==(other) {
     return value == other.value;
+  }
+}
+
+extension Collect<T> on List<T> {
+  void mergeSort (int Function(T a, T b) compare) {
+    collect.mergeSort(this, compare:compare);
   }
 }

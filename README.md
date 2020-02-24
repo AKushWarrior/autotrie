@@ -3,7 +3,7 @@
 A versatile library which solves autocompletion in Dart/Flutter. It is based around
 a space-efficient implementation of Trie which uses variable-length lists. With this, serving
 auto-suggestions is both fast and no-hassle. Suggestions are also sorted by how often 
-they've been entered, for search-engine-like results.
+they've been entered and subsorted by recency of entry, for search-engine-like results.
 
 Read more about Trie [here][trie].
 
@@ -28,25 +28,31 @@ void main() {
 
   engine.enter('morose'); // Enter scattered words (with mo).
   engine.enter('morty');
+  engine.enter('moment');
+  engine.enter('momentum');
 
   engine.enter('sorose'); // Enter scattered words (without mo).
   engine.enter('sorty');
 
   engine.delete('morose'); // Delete morose.
 
-  print(engine.contains('morose')); // Check if morose is deleted.
+  // Check if morose is deleted.
+  print('Morose deletion check: ${engine.contains('morose')}');
 
-  print(engine.isEmpty); // Check if engine is empty.
+  // Check if engine is empty.
+  print('Engine emptiness check: ${engine.isEmpty}');
 
-  print(engine.suggest('mo')); // Suggestions starting with 'mo', sorted by frequency.
-  // Result: [more, moody, morty]
+  // Suggestions starting with 'mo'.
+  // They've been sorted by frequency and subsorted by recency.
+  print("'mo' suggestions: ${engine.suggest('mo')}");
+  // Result: [more, moody, momentum, moment, morty]
 
-  print(engine.allEntries); // Get all entries, sorted by frequency.
-  // Result: [more, moody, morty, sorose, sorty]
+  // Get all entries.
+  // They've been sorted by frequency and subsorted by recency.
+  print('All entries: ${engine.allEntries}');
+  // Result: [more, moody, sorty, sorose, momentum, moment, morty]
 }
 
-// Check the API Reference for the latest information and adv. 
-// methods from this class.
 ```
 
 ## Hive Integration

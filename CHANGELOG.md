@@ -1,3 +1,8 @@
+## 0.3.1
+- Added subsorting by recency
+- Removed isEnd to save space and replaced it with > 0 checks
+- Somewhat better/more detailed docs
+
 ## 0.2.1
 - Added integration with Hive
 - Better documentation

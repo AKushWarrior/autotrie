@@ -12,11 +12,13 @@ void main() {
 
   tree.addWord('morose'); //enter scattered words (with mo)
   tree.addWord('morty');
+  tree.addWord('moment');
+  tree.addWord('momentum');
 
   tree.addWord('sorose'); //enter scattered words (without mo)
   tree.addWord('sorty');
 
   tree.remove('morose');
 
-  print(tree.suggestions('mo')); // [more, moody, morose, morty]
+  print(tree.suggestions('mo')); // [more, moody, morty, moment, momentum]
 }
