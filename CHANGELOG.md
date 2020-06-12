@@ -1,3 +1,7 @@
+## 0.4.1
+- Fixed Hive integration (was defunct)
+- It now uses extension methods
+
 ## 0.3.1
 - Added subsorting by recency
 - Removed isEnd to save space and replaced it with > 0 checks

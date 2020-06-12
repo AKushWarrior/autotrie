@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'datatree/tree.dart';
 import 'package:hive/hive.dart';
 
@@ -7,6 +9,7 @@ import 'package:hive/hive.dart';
 /// method to get the auto-completions for the beginning of a String.
 class AutoComplete {
   TrieSearchTree _tree;
+  bool _hasChanged;
 
   /// Constructs an instance of `AutoComplete`.
   ///
@@ -20,9 +23,11 @@ class AutoComplete {
   /// with the most recently entered word being on top.
   AutoComplete({List<String> bank}) {
     _tree = TrieSearchTree();
+    _hasChanged = false;
     bank ??= <String>[];
     for (var x in bank) {
       enter(x);
+      _hasChanged = true;
     }
   }
 
@@ -33,9 +38,10 @@ class AutoComplete {
   /// results are sorted by number of times entered.
   ///
   /// If multiple words have the same number of entries, they are sorted by recency,
-  /// with the most recently entered word being on top.
+  /// with the most recently entered word being first.
   void enter(String entry) {
     _tree.addWord(entry);
+    _hasChanged = true;
   }
 
   /// Add multiple entries to the engine.
@@ -50,11 +56,13 @@ class AutoComplete {
     for (var x in entries) {
       enter(x);
     }
+    _hasChanged = true;
   }
 
   /// Clear all the entries. The engine is now blank.
   void clearEntries() {
     _tree.root = TrieNode('', false);
+    _hasChanged = true;
   }
 
   /// Get all the entries in a list.
@@ -89,10 +97,7 @@ class AutoComplete {
 }
 
 
-class AutoCompleteBox extends Box {
-  AutoComplete _engineKeys;
-  AutoComplete _engineValues;
-
+extension AutoCompleteBox on Box {
   /// Gives suggested auto-complete keys from this box, along with corresponding
   /// values. Suggested values are sorted by number of occurrences in this box.
   ///
@@ -103,9 +108,10 @@ class AutoCompleteBox extends Box {
   /// - The keys are the autocomplete suggestions.
   /// - The values are the corresponding values from this box.
   ///
-  /// You should call [refreshAuto] directly before this. Recency sorting does
-  /// not work for Hive integration.
+  /// Recency subsorting does not work for Hive integration.
   Map<dynamic, dynamic> searchKeys(String keyPrefix) {
+    var keyList = keys.map((e) => e.toString()).toList();
+    var _engineKeys = AutoComplete(bank: keyList);
     var keysuggest = _engineKeys.suggest(keyPrefix);
     var map = toMap();
     map.removeWhere((dynamic key, dynamic val) {
@@ -124,9 +130,10 @@ class AutoCompleteBox extends Box {
   /// - The keys are the correspondent keys to the autocomplete suggestions.
   /// - The values are the autocomplete suggestions.
   ///
-  /// You should call [refreshAuto] directly before this. Recency sorting does
-  /// not work for Hive integration.
+  /// Recency subsorting does not work for Hive integration.
   Map<dynamic, dynamic> searchValues(String valuePrefix) {
+    var valList = values.map((e) => e.toString()).toList();
+    var _engineValues = AutoComplete(bank: valList);
     var valuesuggest = _engineValues.suggest(valuePrefix);
     var map = toMap();
     map.removeWhere((dynamic key, dynamic val) {
@@ -134,24 +141,4 @@ class AutoCompleteBox extends Box {
     });
     return map;
   }
-
-  /// Refresh the autocomplete engine of this AutoCompleteBox.
-  ///
-  /// This should be called directly before calling [searchValues] or
-  /// [searchKeys].
-  void refreshAuto() {
-    var keyList = keys.toList();
-    var valList = values.toList();
-    _engineKeys = AutoComplete(
-        bank: List.generate(keys.length, (int i) {
-      return keyList[i].toString();
-    }));
-    _engineValues = AutoComplete(
-        bank: List.generate(values.length, (int i) {
-      return valList[i].toString();
-    }));
-  }
-
-  @override
-  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

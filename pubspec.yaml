@@ -1,6 +1,6 @@
 name: autotrie
 description: A auto-completion engine for Dart/Flutter, based around an optimized Trie implementation.
-version: 0.3.1
+version: 0.4.1
 homepage: https://github.com/AKushWarrior/autotrie
 repository: https://github.com/AKushWarrior/autotrie
 issue_tracker: https://github.com/AKushWarrior/autotrie/issues
