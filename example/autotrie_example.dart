@@ -27,12 +27,13 @@ void main() {
   print('Engine emptiness check: ${engine.isEmpty}');
 
   // Suggestions starting with 'mo'.
-  // They've been sorted by frequency and subsorted by recency.
+  // They've been ranked by frequency and recency. Since they're all so similar
+  // in recency, frequency takes priority.
   print("'mo' suggestions: ${engine.suggest('mo')}");
   // Result: [more, moody, momentum, moment, morty]
 
   // Get all entries.
-  // They've been sorted by frequency and subsorted by recency.
+  // They've not been sorted.
   print('All entries: ${engine.allEntries}');
   // Result: [more, moody, sorty, sorose, momentum, moment, morty]
 }

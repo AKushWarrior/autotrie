@@ -1,28 +1,42 @@
 import 'package:collection/collection.dart' as collect;
+import '../autotrie_base.dart';
 
 class TrieSearchTree {
   TrieNode root;
+  double Function(SortValue e) sort;
 
-  TrieSearchTree () {
+  TrieSearchTree (this.sort) {
     root = TrieNode('', false);
     root.children = <TrieNode>[];
   }
 
   void addWord (String word) {
     var base = root;
+
+    //Iterate through string and add/progress through nodes.
     for (var i = 0; i<word.length; i++) {
       var x = TrieNode(word[i], false);
       if (!base.children.contains(x)) {
+        // x is added to base.children
         base.children.add(x);
       } else {
-        x = base.children[base.children.indexOf(x)];
+        // x points to base.children version
+        x = base.children.where((e) => e==x).first;
       }
-      x.lastInsert = DateTime.now().microsecondsSinceEpoch;
+      x.lastInsert = DateTime.now().millisecondsSinceEpoch;
       if (i == word.length-1) {
         x.hits++;
       }
       base = x;
     }
+  }
+
+  List<TrieString> get all {
+    var base = root;
+    if (base.children == <TrieNode>[] && base.hits > 0) return [];
+    var returner = <TrieString>[];
+    _suggestRec(base, '', returner);
+    return returner;
   }
 
   List<String> suggestions (String prefix) {
@@ -38,25 +52,22 @@ class TrieSearchTree {
     if (base.children == <TrieNode>[] && base.hits > 0) return [prefix];
     var returner = <TrieString>[];
     _suggestRec(base, prefix, returner);
-    returner.sort((TrieString a, TrieString b) {
-      if (a.lastInsert < b.lastInsert) {
-        return 1;
-      } else if (a.lastInsert == b.lastInsert) {
-        return 0;
-      } else {
-        return -1;
-      }
-    });
+
     returner.mergeSort((TrieString a, TrieString b) {
-      if (a.hits < b.hits) {
+      var sortA = sort(SortValue(a.lastInsert, a.hits));
+      var sortB = sort(SortValue(b.lastInsert, b.hits));
+
+      print(a.value + '$sortA');
+      print(b.value + '$sortB');
+      if (sortA < sortB) {
         return 1;
-      } else if (a.hits == b.hits) {
+      } else if (sortA == sortB) {
         return 0;
       } else {
         return -1;
       }
     });
-    return List.generate(returner.length, (int i) {return returner[i].value;});
+    return returner.map((e) => e.value).toList();
   }
 
   void _suggestRec (TrieNode node, String word, List<TrieString> returner) {
@@ -70,7 +81,7 @@ class TrieSearchTree {
     var base = root;
     for (var i = 0; i < word.length; i++) {
       var x = TrieNode(word[i], false);
-      if (!base.children.contains(TrieNode(word[i], false))) return false;
+      if (!base.children.contains(x)) return false;
       base = base.children[base.children.indexOf(x)];
     }
     return true;
@@ -79,26 +90,25 @@ class TrieSearchTree {
   void remove (String word) {
     if (root.children.isEmpty) {
       return;
-    } else if (!search(word)) return;
+    } else if (!search(word)) {
+      return;
+    }
     _delete(root, word, 0);
   }
 
   bool _delete (TrieNode cur, String word, int index) {
     if (index == word.length) {
-      if (!(cur.hits > 0)) {
-        return false;
-      }
       return cur.children.isEmpty;
     }
     var ch = word[index];
-    var node = cur.children[cur.children.indexOf(TrieNode(ch, false))];
-    if (node == null) {
+    var next = cur.children[cur.children.indexOf(TrieNode(ch, index == word.length-1))];
+    if (next == null) {
       return false;
     }
-    var shouldDeleteCurrentNode = _delete(node, word, index + 1) && !(node.hits>0);
+    var shouldDeleteNode = _delete(next, word, index + 1) && (!(next.hits>0) || index == word.length -1);
 
-    if (shouldDeleteCurrentNode) {
-      cur.children.remove(TrieNode(ch, false));
+    if (shouldDeleteNode) {
+      cur.children.remove(next);
       return cur.children.isEmpty;
     }
     return false;
@@ -114,6 +124,11 @@ class TrieString {
     this.value = value;
     this.hits = hits;
     lastInsert = insert;
+  }
+
+  @override
+  String toString() {
+    return '$value | $hits | $lastInsert';
   }
 }
 
