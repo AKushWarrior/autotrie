@@ -1,19 +1,25 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'datatree/tree.dart';
 import 'package:hive/hive.dart';
 import 'package:meta/meta.dart';
+
+part 'datatree/tree.dart';
 
 /// Engine for auto-completion of Strings.
 ///
 /// Add entries to build up the suggestion bank. Then, you can use the suggest
 /// method to get the auto-completions for the beginning of a String.
 class AutoComplete {
-  TrieSearchTree _tree;
-  bool _changedSincePersist = true;
+  _TrieSearchTree _tree;
+
+  /// Whether this autocompletion engine has changed since the last time
+  /// `persist` was called.
+  bool changedSincePersist = true;
 
   /// Constructs an instance of `AutoComplete`.
+  ///
+  /// This uses [engine] to sort the results of autocompletion.
   ///
   /// If you pass a [bank] parameter, the engine will have all the Strings in
   /// bank as search results.
@@ -23,12 +29,22 @@ class AutoComplete {
   ///
   /// If multiple words have the same number of entries, they are sorted by recency,
   /// with the most recently entered word being on top.
-  AutoComplete({@required SortEngine algorithm, List<String> bank}) {
-    _tree = TrieSearchTree(algorithm.scoreFunc);
+  AutoComplete({@required SortEngine engine, List<String> bank}) {
+    _tree = _TrieSearchTree(engine.scoreFunc);
     bank ??= <String>[];
     for (var x in bank) {
       enter(x);
     }
+  }
+
+  AutoComplete.fromFile({@required File file, @required SortEngine engine}) {
+    var fileBank = file.readAsLinesSync();
+    var tree = _TrieSearchTree(engine.scoreFunc);
+    for (var x in fileBank) {
+      var values = x.split(' | ');
+      tree.addWordWithParams(values[0], int.parse(values[1]), int.parse(values[2]));
+    }
+    _tree = tree;
   }
 
   /// Add an entry to the engine.
@@ -41,7 +57,7 @@ class AutoComplete {
   /// with the most recently entered word being first.
   void enter(String entry) {
     _tree.addWord(entry);
-    _changedSincePersist = true;
+    changedSincePersist = true;
   }
 
   /// Add multiple entries to the engine.
@@ -56,13 +72,13 @@ class AutoComplete {
     for (var x in entries) {
       enter(x);
     }
-    _changedSincePersist = true;
+    changedSincePersist = true;
   }
 
   /// Clear all the entries. The engine is now blank.
   void clearEntries() {
     _tree.root = TrieNode('', false);
-    _changedSincePersist = true;
+    changedSincePersist = true;
   }
 
   /// Get all the entries in a list.
@@ -94,20 +110,15 @@ class AutoComplete {
   void delete(String entry) => _tree.remove(entry);
 
   /// Takes a file and writes the entire engine to it. You can then rebuild this
-  /// engine at some point in the future.
+  /// engine at some point in the future from the file.
   Future<void> persist(File file) async {
-    if (!_changedSincePersist) {
-      return;
-    } else {
-      var entriesToWrite = _tree.all;
-      var sink = file.openWrite();
-      sink.writeAll(entriesToWrite, '\n');
-      await sink.flush();
-      await sink.close();
-    }
+    var entriesToWrite = _tree.all;
+    var sink = file.openWrite();
+    sink.writeAll(entriesToWrite, '\n');
+    await sink.flush();
+    await sink.close();
   }
 }
-
 
 extension AutoCompleteBox on Box {
   /// Gives suggested auto-complete keys from this box, along with corresponding
@@ -121,7 +132,8 @@ extension AutoCompleteBox on Box {
   /// - The values are the corresponding values from this box.
   Map<dynamic, dynamic> searchKeys(String keyPrefix) {
     var keyList = keys.map((e) => e.toString()).toList();
-    var _engineKeys = AutoComplete(algorithm: SortEngine.entriesOnly(), bank: keyList);
+    var _engineKeys =
+        AutoComplete(engine: SortEngine.entriesOnly(), bank: keyList);
     var keysuggest = _engineKeys.suggest(keyPrefix);
     var map = toMap();
     map.removeWhere((dynamic key, dynamic val) {
@@ -141,7 +153,8 @@ extension AutoCompleteBox on Box {
   /// - The values are the autocomplete suggestions.
   Map<dynamic, dynamic> searchValues(String valuePrefix) {
     var valList = values.map((e) => e.toString()).toList();
-    var _engineValues = AutoComplete(algorithm: SortEngine.entriesOnly(), bank: valList);
+    var _engineValues =
+        AutoComplete(engine: SortEngine.entriesOnly(), bank: valList);
     var valuesuggest = _engineValues.suggest(valuePrefix);
     var map = toMap();
     map.removeWhere((dynamic key, dynamic val) {
@@ -187,13 +200,16 @@ class SortEngine {
   /// until their respective max points. The entries curve is traditional (more
   /// entries --> better score) and the time curve is flipped (more time --> worse
   /// score). As noted above, both max points are user defined.
-  SortEngine.configMulti(Duration timeScale, int maxEntries, double msWeight, double entryWeight) {
+  SortEngine.configMulti(
+      Duration timeScale, int maxEntries, double msWeight, double entryWeight) {
     if (msWeight + entryWeight != 1.0) {
       throw ArgumentError('msWeight + entryWeight must equal 1.');
     }
     scoreFunc = (SortValue a) {
-      var msScore = 1/pow(1.5, (1/timeScale.inMilliseconds)*a.msToNow) * msWeight;
-      var entryScore = (1 + (-1/pow(1.5, (1/maxEntries)*a.numEntries))) * entryWeight;
+      var msScore =
+          1 / pow(1.5, (1 / timeScale.inMilliseconds) * a.msToNow) * msWeight;
+      var entryScore =
+          (1 + (-1 / pow(1.5, (1 / maxEntries) * a.numEntries))) * entryWeight;
       return entryScore + msScore;
     };
   }
@@ -219,8 +235,9 @@ class SortEngine {
       throw ArgumentError('msWeight + entryWeight must equal 1.');
     }
     scoreFunc = (SortValue a) {
-      var msScore = 1/pow(1.5, (1/0x174876E800)*(a.msToNow)) * msWeight;
-      var entryScore = (1 + (-1/pow(1.5, (1/30)*a.numEntries))) * entryWeight;
+      var msScore = 1 / pow(1.5, (1 / 0x174876E800) * (a.msToNow)) * msWeight;
+      var entryScore =
+          (1 + (-1 / pow(1.5, (1 / 30) * a.numEntries))) * entryWeight;
       return entryScore + msScore;
     };
   }
@@ -228,6 +245,7 @@ class SortEngine {
 
 class SortValue {
   final int _msSinceEpoch;
+
   int get msToNow => DateTime.now().millisecondsSinceEpoch - _msSinceEpoch;
   final int numEntries;
 

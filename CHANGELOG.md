@@ -1,3 +1,10 @@
+## 1.0.0
+- Added complex sorting support
+- Added batteries-included file persistence
+- Updated dependencies
+- Increased efficiency due to elimination of double sorting (one-step instead)
+- Updated README
+
 ## 0.4.1
 - Fixed Hive integration (was defunct)
 - It now uses extension methods

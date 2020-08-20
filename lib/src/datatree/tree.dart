@@ -1,11 +1,10 @@
-import 'package:collection/collection.dart' as collect;
-import '../autotrie_base.dart';
+part of '../autotrie_base.dart';
 
-class TrieSearchTree {
+class _TrieSearchTree {
   TrieNode root;
   double Function(SortValue e) sort;
 
-  TrieSearchTree (this.sort) {
+  _TrieSearchTree (this.sort) {
     root = TrieNode('', false);
     root.children = <TrieNode>[];
   }
@@ -23,9 +22,30 @@ class TrieSearchTree {
         // x points to base.children version
         x = base.children.where((e) => e==x).first;
       }
-      x.lastInsert = DateTime.now().millisecondsSinceEpoch;
       if (i == word.length-1) {
+        x.lastInsert = DateTime.now().millisecondsSinceEpoch;
         x.hits++;
+      }
+      base = x;
+    }
+  }
+
+  void addWordWithParams (String word, int hits, int lastInsert) {
+    var base = root;
+
+    //Iterate through string and add/progress through nodes.
+    for (var i = 0; i<word.length; i++) {
+      var x = TrieNode(word[i], false);
+      if (!base.children.contains(x)) {
+        // x is added to base.children
+        base.children.add(x);
+      } else {
+        // x points to base.children version
+        x = base.children.where((e) => e==x).first;
+      }
+      if (i == word.length-1) {
+        x.lastInsert = lastInsert;
+        x.hits = hits;
       }
       base = x;
     }
@@ -53,12 +73,10 @@ class TrieSearchTree {
     var returner = <TrieString>[];
     _suggestRec(base, prefix, returner);
 
-    returner.mergeSort((TrieString a, TrieString b) {
+    returner.sort((TrieString a, TrieString b) {
       var sortA = sort(SortValue(a.lastInsert, a.hits));
       var sortB = sort(SortValue(b.lastInsert, b.hits));
 
-      print(a.value + '$sortA');
-      print(b.value + '$sortB');
       if (sortA < sortB) {
         return 1;
       } else if (sortA == sortB) {
@@ -146,11 +164,5 @@ class TrieNode {
   @override
   bool operator ==(other) {
     return value == other.value;
-  }
-}
-
-extension Collect<T> on List<T> {
-  void mergeSort (int Function(T a, T b) compare) {
-    collect.mergeSort(this, compare:compare);
   }
 }

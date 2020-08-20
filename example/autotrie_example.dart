@@ -1,7 +1,8 @@
 import 'package:autotrie/autotrie.dart';
+import 'package:autotrie/src/autotrie_base.dart';
 
 void main() {
-  var engine = AutoComplete(); //You can also initialize with a starting databank.
+  var engine = AutoComplete(engine: SortEngine.configMulti(Duration(seconds: 1), 15, 0.5, 0.5)); //You can also initialize with a starting databank.
 
   engine.enter('more'); // Enter more thrice.
   engine.enter('more');
