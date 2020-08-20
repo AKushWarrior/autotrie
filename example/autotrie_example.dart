@@ -22,7 +22,7 @@ void main() {
   engine.delete('morose'); // Delete morose.
 
   // Check if morose is deleted.
-  print('Morose deletion check: ${engine.contains('morose')}');
+  print('Morose deletion check: ${!engine.contains('morose')}');
 
   // Check if engine is empty.
   print('Engine emptiness check: ${engine.isEmpty}');

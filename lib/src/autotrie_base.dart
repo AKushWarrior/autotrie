@@ -84,7 +84,7 @@ class AutoComplete {
   /// Get all the entries in a list.
   ///
   /// This is NOT sorted. Use [suggest('')] to get all results, sorted.
-  List<String> get allEntries => _tree.all.map((e) => e.value);
+  Iterable<String> get allEntries => _tree.all.map((e) => e.value);
 
   /// Suggest entries based on the beginning of the string.
   ///

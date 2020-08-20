@@ -46,7 +46,7 @@ void main() {
   engine.delete('morose'); // Delete morose.
 
   // Check if morose is deleted.
-  print('Morose deletion check: ${engine.contains('morose')}');
+  print('Morose deletion check: ${!engine.contains('morose')}');
 
   // Check if engine is empty.
   print('Engine emptiness check: ${engine.isEmpty}');
@@ -56,8 +56,9 @@ void main() {
   print("'mo' suggestions: ${engine.suggest('mo')}");
   // Result: [more, moody, momentum, moment, morty]
 
-  // They've been ranked by frequency and recency. Since they're all so similar
-  // in recency, frequency takes priority.
+  // Get all entries.
+  // They've *not* been sorted.
+  // Use `engine.suggest('')` to get all entries sorted` 
   print('All entries: ${engine.allEntries}');
   // Result: [more, moody, sorty, sorose, momentum, moment, morty]
 }

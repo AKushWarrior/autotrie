@@ -1,4 +1,4 @@
-## 1.0.0
+## 1.0.0 - 1.0.0+1
 - Added complex sorting support
 - Added batteries-included file persistence
 - Updated dependencies
