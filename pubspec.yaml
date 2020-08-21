@@ -10,7 +10,7 @@ environment:
 
 dependencies:
   hive: ^1.4.3
-  meta: ^1.2.2
+  meta: ^1.1.1
 
 dev_dependencies:
   pedantic: ^1.8.0
